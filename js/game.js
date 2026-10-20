@@ -4,576 +4,379 @@
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (id) => document.getElementById(id);
 
-  const hero = $("hero");
-  const gameSection = $("game-section");
-  const startButton = $("start-game");
-  const ctaButton = $("cta-start");
-  const restartButton = $("restart-game");
-
-  const energyText = $("energy-text");
-  const energyBar = $("energy-bar");
-  const xpText = $("xp-text");
-  const xpBar = $("xp-bar");
-  const inventoryList = $("inventory-list");
-
-  const chapterLabel = $("chapter-label");
-  const progressLabel = $("progress-label");
-  const progressFill = $("story-progress-fill");
-  const storyArt = $("story-art");
-  const storyIllustration = $("story-illustration");
-  const storyKicker = $("story-kicker");
-  const storyTitle = $("story-title");
-  const storyDescription = $("story-description");
-  const choicesHeading = $("choices-heading");
-  const choicesList = $("choices-list");
-  const storyMessage = $("story-message");
-
-  const challengeBox = $("challenge-box");
-  const challengeQuestion = $("challenge-question");
-  const challengeAnswers = $("challenge-answers");
-  const challengeFeedback = $("challenge-feedback");
-
-  let state;
-  let toastTimeout;
+  const ui = {
+    heroXp: $("hero-xp"),
+    energyText: $("energy-text"),
+    energyBar: $("energy-bar"),
+    xpText: $("xp-text"),
+    xpBar: $("xp-bar"),
+    inventory: $("inventory-list"),
+    chapter: $("chapter-label"),
+    progressLabel: $("progress-label"),
+    progressFill: $("story-progress-fill"),
+    art: $("story-art"),
+    illustration: $("story-illustration"),
+    kicker: $("story-kicker"),
+    title: $("story-title"),
+    description: $("story-description"),
+    choicesHeading: $("choices-heading"),
+    choices: $("choices-list"),
+    message: $("story-message"),
+    challengeBox: $("challenge-box"),
+    challengeQuestion: $("challenge-question"),
+    challengeAnswers: $("challenge-answers"),
+    challengeFeedback: $("challenge-feedback"),
+    restart: $("restart-game")
+  };
 
   const initialState = () => ({
+    node: "portal",
     energy: 100,
     xp: 0,
     inventory: [],
     visited: [],
     completedChallenges: [],
-    currentNode: "portal",
-    ended: false
+    finished: false
   });
 
-  // Cada escolha aponta para outro ponto da história.
-  // As consequências são aplicadas pelo sistema de escolhas.
+  let state = initialState();
+
   const story = {
     portal: {
       chapter: 1,
-      kicker: "SINAL RECEBIDO",
+      progress: 8,
+      kicker: "UM NOVO UNIVERSO",
       title: "O portal desconhecido",
       icon: "⌘",
-      description:
-        "Você desperta diante de um portal digital. Símbolos luminosos flutuam no ar e uma mensagem aparece na tela:\n\n\"O Núcleo dos Algoritmos perdeu sua energia. Somente alguém capaz de pensar logicamente poderá restaurá-lo.\"\n\nDois caminhos se abrem diante de você.",
+      description: "Você encontra um portal brilhante em um laboratório abandonado. Do outro lado, um universo digital espera por alguém capaz de resolver seus enigmas. Sua missão começa agora.",
       choices: [
-        {
-          title: "Explorar a floresta de dados",
-          detail: "Investigar pistas antes de avançar.",
-          target: "forest",
-          xp: 10,
-          item: "Mapa de dados"
-        },
-        {
-          title: "Seguir a trilha de circuitos",
-          detail: "Confiar na tecnologia e avançar rapidamente.",
-          target: "circuits",
-          energy: -10,
-          xp: 5
-        }
+        { title: "Entrar no portal", detail: "Descobrir o que existe do outro lado", next: "forest", xp: 10, message: "Você atravessou o portal e ganhou 10 XP." },
+        { title: "Observar os símbolos", detail: "Procurar pistas antes de avançar", next: "circuits", xp: 15, item: "Mapa de dados", message: "Você analisou os símbolos e encontrou um mapa. +15 XP." }
       ]
     },
-
     forest: {
-      chapter: 1,
-      kicker: "ÁREA DE EXPLORAÇÃO",
+      chapter: 2,
+      progress: 22,
+      kicker: "CAPÍTULO 02 · EXPLORAÇÃO",
       title: "A floresta de dados",
-      icon: "♧",
-      description:
-        "Árvores cristalinas armazenam informações em suas folhas. No centro da floresta, você encontra um terminal com uma sequência incompleta: 2, 4, 6, 8...\n\nUma pequena criatura digital pede sua ajuda para descobrir o próximo número.",
-      choices: [
-        {
-          title: "Analisar o padrão",
-          detail: "Observar como a sequência evolui.",
-          target: "logic",
-          xp: 10
-        },
-        {
-          title: "Pedir uma pista ao guardião",
-          detail: "Ganhar orientação antes de resolver.",
-          target: "guardian",
-          energy: -5,
-          item: "Pista do guardião"
-        }
-      ]
-    },
-
-    circuits: {
-      chapter: 1,
-      kicker: "ZONA TECNOLÓGICA",
-      title: "A trilha de circuitos",
       icon: "⌁",
-      description:
-        "Linhas de energia atravessam uma ponte suspensa. Um painel mostra três comandos: observar, calcular e agir. O sistema avisa que executar uma ação sem analisar os dados pode consumir energia desnecessária.",
+      description: "Árvores luminosas formam um labirinto de caminhos. Um painel informa que cada rota segue regras específicas. Para avançar, você precisa pensar como um algoritmo: observar, decidir e agir.",
       choices: [
-        {
-          title: "Examinar o painel",
-          detail: "Usar as informações antes de agir.",
-          target: "logic",
-          xp: 10,
-          item: "Chip de análise"
-        },
-        {
-          title: "Avançar sem verificar",
-          detail: "Testar o caminho diretamente.",
-          target: "guardian",
-          energy: -15
-        }
+        { title: "Seguir as luzes azuis", detail: "Confiar nas pistas do caminho", next: "guardian", xp: 10, item: "Cristal lógico", message: "As luzes levaram você até um guardião. +10 XP." },
+        { title: "Explorar o caminho lateral", detail: "Investigar uma rota alternativa", next: "circuits", energy: -5, xp: 15, message: "Você encontrou um atalho e ganhou 15 XP, mas gastou um pouco de energia." }
       ]
     },
-
-    guardian: {
-      chapter: 1,
-      kicker: "ENCONTRO ESPECIAL",
-      title: "O guardião dos comandos",
-      icon: "◇",
-      description:
-        "Um guardião holográfico surge diante de você. Ele explica que um bom algoritmo precisa de instruções claras, organizadas e executadas na ordem correta.\n\nAntes de liberar a passagem, ele oferece um desafio de lógica.",
-      challenge: {
-        id: "sequence",
-        question: "Qual número completa a sequência: 2, 4, 6, 8, ...?",
-        answers: ["9", "10", "12", "16"],
-        correct: 1,
-        success:
-          "Resposta correta! A sequência aumenta de 2 em 2. Você ganhou experiência.",
-        failure:
-          "A resposta correta é 10: cada número aumenta em 2. Errar também faz parte do aprendizado."
-      },
-      afterChoices: [
-        {
-          title: "Continuar para o laboratório",
-          detail: "Investigar a origem do problema.",
-          target: "laboratory",
-          xp: 10,
-          energy: 5,
-          item: "Chave holográfica"
-        }
-      ]
-    },
-
-    logic: {
+    circuits: {
       chapter: 2,
-      kicker: "DESAFIO DE LÓGICA",
-      title: "O terminal inteligente",
-      icon: "{ }",
-      description:
-        "Você encontra um terminal que só aceita comandos lógicos. A tela mostra uma pergunta: se uma porta abre apenas quando a chave está presente, o que precisa ser verificado antes de entrar?\n\nPense nas condições antes de escolher.",
-      challenge: {
-        id: "condition",
-        question: "Qual ideia representa melhor uma condição em um algoritmo?",
-        answers: [
-          "Repetir uma frase sem parar.",
-          "Tomar uma decisão com base em uma verificação.",
-          "Mudar a cor da tela sem motivo.",
-          "Apagar todos os dados automaticamente."
-        ],
-        correct: 1,
-        success:
-          "Correto! Uma condição permite executar ações diferentes dependendo de uma verificação.",
-        failure:
-          "Uma condição verifica algo e determina qual caminho seguir, como em uma estrutura if/else."
-      },
-      afterChoices: [
-        {
-          title: "Entrar no laboratório",
-          detail: "Levar suas descobertas para a próxima etapa.",
-          target: "laboratory",
-          xp: 15,
-          item: "Fragmento lógico"
-        }
-      ]
-    },
-
-    laboratory: {
-      chapter: 2,
-      kicker: "LABORATÓRIO CENTRAL",
-      title: "O algoritmo perdido",
+      progress: 28,
+      kicker: "CAPÍTULO 02 · INVESTIGAÇÃO",
+      title: "A sala dos circuitos",
       icon: "⌘",
-      description:
-        "Dentro do laboratório, você encontra o código que controla o Núcleo. Algumas instruções estão fora de ordem. Um painel explica que algoritmos são sequências de passos organizados para resolver um problema.\n\nVocê precisa decidir como restaurar o sistema.",
+      description: "Uma sala cheia de circuitos apresenta uma sequência incompleta. Você percebe que, antes de resolver um problema, precisa identificar os dados disponíveis e entender a ordem das instruções.",
       choices: [
-        {
-          title: "Organizar os passos antes de executar",
-          detail: "Planejar a solução e verificar cada etapa.",
-          target: "vault",
-          xp: 15,
-          energy: 5,
-          item: "Código organizado"
-        },
-        {
-          title: "Executar tudo de uma vez",
-          detail: "Tentar resolver rapidamente sem revisar.",
-          target: "glitch",
-          energy: -20,
-          xp: 5
-        }
+        { title: "Organizar as instruções", detail: "Colocar as etapas em uma sequência lógica", next: "logic", xp: 15, item: "Chave de sequência", message: "A sequência ficou organizada. Você ganhou 15 XP." },
+        { title: "Procurar outro caminho", detail: "Continuar a exploração", next: "guardian", xp: 5, message: "Você encontrou uma passagem para o guardião. +5 XP." }
       ]
     },
-
-    glitch: {
-      chapter: 2,
-      kicker: "ALERTA DO SISTEMA",
-      title: "Uma falha inesperada",
-      icon: "⚠",
-      description:
-        "O terminal pisca e alguns comandos são executados fora da ordem esperada. Você percebe que não basta escrever instruções: é preciso organizar os passos e verificar as condições.\n\nVocê ainda pode recuperar o sistema.",
-      choices: [
-        {
-          title: "Depurar o código",
-          detail: "Encontrar e corrigir a sequência incorreta.",
-          target: "vault",
-          xp: 15,
-          energy: -5,
-          item: "Registro de depuração"
-        },
-        {
-          title: "Usar a pista do inventário",
-          detail: "Revisar as informações coletadas.",
-          target: "vault",
-          xp: 10,
-          item: "Plano de recuperação"
-        }
-      ]
-    },
-
-    vault: {
+    guardian: {
       chapter: 3,
-      kicker: "CÂMARA DO NÚCLEO",
-      title: "A última sequência",
-      icon: "✦",
-      description:
-        "Você chega à câmara central. O Núcleo está diante de você, mas precisa receber uma sequência correta de instruções.\n\nUma última verificação separa você da conclusão da missão.",
+      progress: 40,
+      kicker: "CAPÍTULO 03 · DESAFIO",
+      title: "O guardião da lógica",
+      icon: "◇",
+      description: "Uma inteligência artificial bloqueia a passagem. Ela só libera o caminho para quem demonstra compreender como um algoritmo funciona. Responda ao desafio para continuar.",
       challenge: {
-        id: "algorithm",
-        question: "Qual é a melhor ordem para resolver um problema com um algoritmo?",
+        question: "O que é um algoritmo?",
         answers: [
-          "Executar ações aleatórias e esperar.",
-          "Definir o problema, planejar passos e executar.",
-          "Pular as etapas e verificar apenas no final.",
-          "Escrever instruções sem uma ordem definida."
+          "Uma sequência ordenada de passos para resolver um problema",
+          "Uma imagem usada para decorar um programa",
+          "Um computador que funciona sem instruções"
+        ],
+        correct: 0,
+        success: "Correto! Um algoritmo organiza passos para alcançar um resultado. +25 XP.",
+        failure: "Ainda não! Pense em uma receita: ela também tem uma sequência de instruções. Tente novamente."
+      },
+      after: "logic"
+    },
+    logic: {
+      chapter: 4,
+      progress: 55,
+      kicker: "CAPÍTULO 04 · DECISÕES",
+      title: "A ponte condicional",
+      icon: "⇄",
+      description: "Uma ponte digital muda de direção de acordo com uma condição. O painel diz: “Se a energia for maior que zero, abra a passagem; caso contrário, mantenha-a fechada”. Você precisa identificar a lógica da regra.",
+      challenge: {
+        question: "Se energia > 0, qual ação a regra determina?",
+        answers: [
+          "Fechar a passagem",
+          "Abrir a passagem",
+          "Apagar todos os dados"
         ],
         correct: 1,
-        success:
-          "Excelente! Planejamento e execução organizada são partes essenciais de um algoritmo.",
-        failure:
-          "A melhor opção é definir o problema, planejar os passos e depois executar a solução."
+        success: "Muito bem! A condição é verdadeira quando a energia é maior que zero. +25 XP.",
+        failure: "Leia a condição novamente. Quando a energia é maior que zero, a passagem deve ser aberta."
       },
-      afterChoices: [
-        {
-          title: "Ativar o Núcleo dos Algoritmos",
-          detail: "Finalizar a missão e descobrir seu resultado.",
-          target: "ending",
-          xp: 25,
-          item: "Núcleo restaurado"
-        }
+      after: "laboratory"
+    },
+    laboratory: {
+      chapter: 5,
+      progress: 70,
+      kicker: "CAPÍTULO 05 · DESCOBERTA",
+      title: "O laboratório de soluções",
+      icon: "⌬",
+      description: "Você chega a um laboratório com uma máquina desativada. Para ligá-la, precisa escolher uma estratégia: executar as etapas na ordem correta ou agir sem verificar as instruções.",
+      choices: [
+        { title: "Seguir as etapas em ordem", detail: "Planejar antes de executar", next: "glitch", xp: 20, item: "Núcleo de energia", message: "Sua organização ativou a máquina. +20 XP." },
+        { title: "Agir sem planejamento", detail: "Tentar resolver tudo de uma vez", next: "glitch", energy: -15, xp: 5, message: "A máquina ligou, mas a tentativa custou energia. +5 XP." }
       ]
+    },
+    glitch: {
+      chapter: 6,
+      progress: 82,
+      kicker: "CAPÍTULO 06 · O ÚLTIMO ENIGMA",
+      title: "O código corrompido",
+      icon: "</>",
+      description: "Um erro bloqueia o caminho para a saída. Você encontra três instruções embaralhadas. Para seguir em frente, escolha a sequência que faz sentido: primeiro compreender o problema, depois planejar e, por fim, executar.",
+      choices: [
+        { title: "Analisar → Planejar → Executar", detail: "Resolver o problema por etapas", next: "vault", xp: 20, item: "Fragmento de código", message: "A sequência correta restaurou o sistema. +20 XP." },
+        { title: "Executar → Ignorar → Recomeçar", detail: "Agir sem entender o problema", next: "vault", energy: -10, xp: 5, message: "Você avançou, mas perdeu energia tentando uma sequência inadequada. +5 XP." }
+      ]
+    },
+    vault: {
+      chapter: 7,
+      progress: 92,
+      kicker: "CAPÍTULO 07 · PROVA FINAL",
+      title: "O cofre dos algoritmos",
+      icon: "⬡",
+      description: "O cofre final contém a chave para restaurar o universo digital. Para abri-lo, você precisa identificar qual característica torna um algoritmo mais fácil de compreender e executar.",
+      challenge: {
+        question: "Qual é uma boa característica de um algoritmo?",
+        answers: [
+          "Ter passos claros, organizados e bem definidos",
+          "Usar instruções aleatórias sem uma ordem",
+          "Esconder o objetivo de cada etapa"
+        ],
+        correct: 0,
+        success: "Desafio concluído! Instruções claras facilitam a solução de problemas. +30 XP.",
+        failure: "Tente novamente. Um bom algoritmo precisa de passos organizados e compreensíveis."
+      },
+      after: "ending"
+    },
+    ending: {
+      chapter: 8,
+      progress: 100,
+      kicker: "MISSÃO CONCLUÍDA",
+      title: "Você restaurou o universo!",
+      icon: "✦",
+      description: "O sistema voltou a funcionar. Ao longo da aventura, você explorou caminhos, organizou instruções, analisou condições e resolveu desafios. Você descobriu que programar não é apenas escrever código: é aprender a pensar em etapas.",
+      ending: true
     }
   };
 
-  function startGame() {
-    state = initialState();
-    hero.hidden = true;
-    gameSection.hidden = false;
-    updateStats();
-    renderNode("portal");
-    gameSection.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
   function updateStats() {
-    energyText.textContent = `${state.energy} / 100`;
-    energyBar.style.width = `${state.energy}%`;
+    ui.energyText.textContent = state.energy + "%";
+    ui.energyBar.style.width = state.energy + "%";
+    ui.xpText.textContent = state.xp + " XP";
+    ui.xpBar.style.width = Math.min(state.xp / 125 * 100, 100) + "%";
+    ui.heroXp.textContent = state.xp + " XP";
 
-    xpText.textContent = `${state.xp} XP`;
-    xpBar.style.width = `${Math.min(100, state.xp / 100 * 100)}%`;
-
-    inventoryList.replaceChildren();
+    ui.inventory.replaceChildren();
 
     if (state.inventory.length === 0) {
-      const empty = document.createElement("p");
+      const empty = document.createElement("span");
       empty.className = "inventory-empty";
       empty.textContent = "Seus itens aparecerão aqui.";
-      inventoryList.appendChild(empty);
+      ui.inventory.appendChild(empty);
     } else {
       state.inventory.forEach((item) => {
-        const chip = document.createElement("span");
-        chip.className = "inventory-item";
-        chip.textContent = `◇ ${item}`;
-        inventoryList.appendChild(chip);
+        const tag = document.createElement("span");
+        tag.className = "inventory-item";
+        tag.textContent = "✦ " + item;
+        ui.inventory.appendChild(tag);
       });
     }
   }
 
-  function addItem(item) {
-    if (item && !state.inventory.includes(item)) {
-      state.inventory.push(item);
-    }
-  }
-
-  function applyEffects(choice) {
-    if (Number.isFinite(choice.energy)) {
-      state.energy = Math.max(0, Math.min(100, state.energy + choice.energy));
-    }
-
-    if (Number.isFinite(choice.xp)) {
+  function addReward(choice) {
+    if (typeof choice.xp === "number") {
       state.xp += choice.xp;
     }
 
-    addItem(choice.item);
+    if (typeof choice.energy === "number") {
+      state.energy = Math.max(0, Math.min(100, state.energy + choice.energy));
+    }
+
+    if (choice.item && !state.inventory.includes(choice.item)) {
+      state.inventory.push(choice.item);
+    }
+
     updateStats();
   }
 
-  function renderNode(nodeId) {
+  function renderNode(nodeId, message = "") {
     const node = story[nodeId];
     if (!node) return;
 
-    state.currentNode = nodeId;
-    state.ended = false;
+    state.node = nodeId;
+    if (!state.visited.includes(nodeId)) state.visited.push(nodeId);
 
-    if (!state.visited.includes(nodeId)) {
-      state.visited.push(nodeId);
-    }
+    ui.chapter.textContent = "CAPÍTULO " + String(node.chapter).padStart(2, "0");
+    ui.progressLabel.textContent = node.ending ? "MISSÃO CONCLUÍDA" : "JORNADA EM ANDAMENTO";
+    ui.progressFill.style.width = node.progress + "%";
+    ui.kicker.textContent = node.kicker;
+    ui.title.textContent = node.title;
+    ui.description.textContent = node.description;
+    ui.illustration.textContent = node.icon;
+    ui.message.textContent = message;
 
-    chapterLabel.textContent = `CAPÍTULO ${String(node.chapter).padStart(2, "0")}`;
-    storyKicker.textContent = node.kicker;
-    storyTitle.textContent = node.title;
-    storyDescription.textContent = node.description;
-    storyIllustration.textContent = node.icon;
+    ui.art.classList.toggle("ending-art", Boolean(node.ending));
+    ui.choices.replaceChildren();
+    ui.challengeBox.hidden = true;
+    ui.challengeAnswers.replaceChildren();
+    ui.challengeFeedback.textContent = "";
 
-    const percentage = Math.min(95, Math.round(state.visited.length / 9 * 100));
-    progressLabel.textContent = `PROGRESSO ${percentage}%`;
-    progressFill.style.width = `${percentage}%`;
-
-    storyArt.dataset.chapter = String(node.chapter);
-    storyMessage.textContent = "";
-
-    challengeBox.hidden = true;
-    challengeAnswers.replaceChildren();
-    challengeFeedback.textContent = "";
-    challengeFeedback.className = "challenge-feedback";
-
-    if (node.challenge && !state.completedChallenges.includes(node.challenge.id)) {
-      renderChallenge(node);
+    if (node.challenge) {
+      renderChallenge(nodeId, node.challenge);
+    } else if (node.ending) {
+      state.finished = true;
+      ui.choicesHeading.textContent = "SUA JORNADA";
+      addChoice({
+        title: "Jogar novamente",
+        detail: "Recomeçar a aventura desde o início",
+        action: restart
+      });
+      addChoice({
+        title: "Rever o que aprendeu",
+        detail: "Ir até os conceitos de programação",
+        action: () => {
+          document.getElementById("aprendizado").scrollIntoView({ behavior: "smooth" });
+        }
+      });
+      ui.message.textContent = "Resultado: " + state.xp + " XP conquistados e " + state.inventory.length + " item(ns) coletado(s).";
     } else {
-      renderChoices(node.choices || []);
+      ui.choicesHeading.textContent = "O QUE VOCÊ VAI FAZER?";
+      node.choices.forEach((choice, index) => {
+        addChoice({
+          title: choice.title,
+          detail: choice.detail,
+          number: String(index + 1).padStart(2, "0"),
+          action: () => selectChoice(choice)
+        });
+      });
     }
 
     updateStats();
   }
 
-  function renderChoices(choices) {
-    challengeBox.hidden = true;
-    choicesHeading.textContent = "O QUE VOCÊ VAI FAZER?";
-    choicesList.replaceChildren();
+  function addChoice({ title, detail, number = "→", action }) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "choice-button";
 
-    choices.forEach((choice, index) => {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "choice-button";
+    const numberSpan = document.createElement("span");
+    numberSpan.className = "choice-number";
+    numberSpan.textContent = number;
 
-      const number = document.createElement("span");
-      number.className = "choice-number";
-      number.textContent = String(index + 1).padStart(2, "0");
+    const textSpan = document.createElement("span");
+    textSpan.className = "choice-text";
 
-      const copy = document.createElement("span");
-      copy.className = "choice-copy";
+    const strong = document.createElement("strong");
+    strong.textContent = title;
 
-      const title = document.createElement("strong");
-      title.textContent = choice.title;
+    const small = document.createElement("small");
+    small.textContent = detail;
 
-      const detail = document.createElement("small");
-      detail.textContent = choice.detail;
+    const arrow = document.createElement("span");
+    arrow.className = "choice-arrow";
+    arrow.textContent = "→";
 
-      copy.append(title, detail);
-
-      const arrow = document.createElement("span");
-      arrow.className = "choice-arrow";
-      arrow.textContent = "→";
-      arrow.setAttribute("aria-hidden", "true");
-
-      button.append(number, copy, arrow);
-      button.addEventListener("click", () => choosePath(choice));
-      choicesList.appendChild(button);
-    });
+    textSpan.append(strong, small);
+    button.append(numberSpan, textSpan, arrow);
+    button.addEventListener("click", action);
+    ui.choices.appendChild(button);
   }
 
-  function choosePath(choice) {
-    if (state.ended) return;
-
-    applyEffects(choice);
-
-    if (state.energy <= 0) {
-      showEnergyEnding();
-      return;
-    }
-
-    if (choice.target === "ending") {
-      renderEnding();
-      return;
-    }
-
-    renderNode(choice.target);
+  function selectChoice(choice) {
+    addReward(choice);
+    renderNode(choice.next, choice.message || "");
   }
 
-  function renderChallenge(node) {
-    const challenge = node.challenge;
-    challengeBox.hidden = false;
-    challengeQuestion.textContent = challenge.question;
-    challengeAnswers.replaceChildren();
+  function renderChallenge(nodeId, challenge) {
+    ui.choicesHeading.textContent = "DESAFIO DE LÓGICA";
+    ui.challengeBox.hidden = false;
+    ui.challengeQuestion.textContent = challenge.question;
 
-    choicesHeading.textContent = "RESOLVA O DESAFIO PARA CONTINUAR";
-    choicesList.replaceChildren();
+    const alreadyCompleted = state.completedChallenges.includes(nodeId);
+    if (alreadyCompleted) {
+      ui.challengeFeedback.textContent = "Este desafio já foi concluído.";
+      addChoice({
+        title: "Continuar aventura",
+        detail: "Seguir para a próxima etapa",
+        action: () => renderNode(story[nodeId].after)
+      });
+      return;
+    }
 
     challenge.answers.forEach((answer, index) => {
       const button = document.createElement("button");
       button.type = "button";
       button.className = "challenge-answer";
-      button.textContent = `${String.fromCharCode(65 + index)}. ${answer}`;
-      button.addEventListener("click", () => answerChallenge(node, index));
-      challengeAnswers.appendChild(button);
+      button.textContent = String.fromCharCode(65 + index) + ". " + answer;
+      button.addEventListener("click", () => answerChallenge(nodeId, challenge, index));
+      ui.challengeAnswers.appendChild(button);
     });
   }
 
-  function answerChallenge(node, selectedIndex) {
-    const challenge = node.challenge;
+  function answerChallenge(nodeId, challenge, answerIndex) {
+    if (state.completedChallenges.includes(nodeId)) return;
 
-    if (state.completedChallenges.includes(challenge.id)) return;
-
-    state.completedChallenges.push(challenge.id);
-
-    const buttons = challengeAnswers.querySelectorAll("button");
-    const correct = selectedIndex === challenge.correct;
-
-    buttons.forEach((button, index) => {
-      button.disabled = true;
-      if (index === challenge.correct) button.classList.add("correct");
-      if (index === selectedIndex && !correct) {
-        button.classList.add("incorrect");
-      }
-    });
-
-    if (correct) {
-      state.xp += 20;
-      state.energy = Math.min(100, state.energy + 5);
-      challengeFeedback.textContent = `✓ ${challenge.success}`;
-      challengeFeedback.classList.add("success");
-    } else {
-      state.energy = Math.max(0, state.energy - 10);
-      challengeFeedback.textContent = challenge.failure;
-      challengeFeedback.classList.add("error");
+    if (answerIndex !== challenge.correct) {
+      ui.challengeFeedback.textContent = challenge.failure;
+      return;
     }
 
+    state.completedChallenges.push(nodeId);
+    const reward = nodeId === "vault" ? 30 : 25;
+    state.xp += reward;
     updateStats();
 
-    choicesHeading.textContent = "PRÓXIMA ETAPA";
-    renderChoices(node.afterChoices || []);
+    ui.challengeAnswers.replaceChildren();
+    ui.challengeFeedback.textContent = challenge.success;
+
+    const continueButton = document.createElement("button");
+    continueButton.type = "button";
+    continueButton.className = "choice-button";
+    continueButton.style.marginTop = "12px";
+
+    const numberSpan = document.createElement("span");
+    numberSpan.className = "choice-number";
+    numberSpan.textContent = "✓";
+
+    const textSpan = document.createElement("span");
+    textSpan.className = "choice-text";
+    const strong = document.createElement("strong");
+    strong.textContent = "Continuar aventura";
+    const small = document.createElement("small");
+    small.textContent = "Avançar para a próxima etapa";
+    textSpan.append(strong, small);
+
+    const arrow = document.createElement("span");
+    arrow.className = "choice-arrow";
+    arrow.textContent = "→";
+
+    continueButton.append(numberSpan, textSpan, arrow);
+    continueButton.addEventListener("click", () => renderNode(story[nodeId].after));
+    ui.choices.appendChild(continueButton);
   }
 
-  function renderEnding() {
-    state.ended = true;
-    progressLabel.textContent = "PROGRESSO 100%";
-    progressFill.style.width = "100%";
-
-    chapterLabel.textContent = "MISSÃO CONCLUÍDA";
-    storyKicker.textContent = "SISTEMA RESTAURADO";
-    storyTitle.textContent = "O Núcleo voltou à vida!";
-    storyDescription.textContent =
-      "Uma onda de luz percorre o mundo digital. Os circuitos voltam a brilhar, os dados se reorganizam e o portal se estabiliza.\n\nVocê provou que observar, planejar e tomar decisões faz toda a diferença. A aventura termina, mas sua jornada na programação está apenas começando.";
-
-    storyIllustration.textContent = "✦";
-    storyMessage.textContent = "✓ Missão finalizada com sucesso!";
-    challengeBox.hidden = true;
-    choicesHeading.textContent = "RESULTADO DA SUA AVENTURA";
-    choicesList.replaceChildren();
-
-    const ending = document.createElement("div");
-    ending.className = "ending-card";
-
-    const icon = document.createElement("div");
-    icon.className = "ending-icon";
-    icon.textContent = "✦";
-
-    const title = document.createElement("h3");
-    title.textContent = getEndingTitle();
-
-    const description = document.createElement("p");
-    description.textContent =
-      `Você concluiu a aventura com ${state.energy} pontos de energia, ${state.xp} XP e ${state.inventory.length} item(ns) coletado(s). Cada decisão ajudou a construir sua jornada.`;
-
-    const score = document.createElement("div");
-    score.className = "ending-score";
-
-    const points = document.createElement("strong");
-    points.textContent = `${state.xp} XP`;
-
-    const label = document.createElement("span");
-    label.textContent = "EXPERIÊNCIA CONQUISTADA";
-
-    score.append(points, label);
-
-    const replay = document.createElement("button");
-    replay.type = "button";
-    replay.className = "button button-primary";
-    replay.textContent = "Jogar novamente ↻";
-    replay.addEventListener("click", startGame);
-
-    ending.append(icon, title, description, score, replay);
-    choicesList.appendChild(ending);
-    updateStats();
-  }
-
-  function getEndingTitle() {
-    if (state.xp >= 80) return "Mestre dos Algoritmos!";
-    if (state.inventory.length >= 3) return "Explorador de Elite!";
-    return "Missão cumprida, explorador!";
-  }
-
-  function showEnergyEnding() {
-    state.ended = true;
-
-    chapterLabel.textContent = "PAUSA NA MISSÃO";
-    storyKicker.textContent = "ENERGIA ESGOTADA";
-    storyTitle.textContent = "É hora de replanejar";
-    storyIllustration.textContent = "↻";
-    storyDescription.textContent =
-      "Sua energia chegou a zero. No desenvolvimento de algoritmos, rever as decisões e planejar melhor faz parte do aprendizado.\n\nVocê pode reiniciar a aventura e experimentar outro caminho.";
-
-    progressLabel.textContent = "MISSÃO INTERROMPIDA";
-    storyMessage.textContent = "Sua jornada ainda pode continuar.";
-    challengeBox.hidden = true;
-    choicesHeading.textContent = "TENTE NOVAMENTE";
-    choicesList.replaceChildren();
-
-    const replay = document.createElement("button");
-    replay.type = "button";
-    replay.className = "button button-primary";
-    replay.textContent = "Recomeçar aventura ↻";
-    replay.addEventListener("click", startGame);
-    choicesList.appendChild(replay);
-  }
-
-  function restartGame() {
+  function restart() {
     state = initialState();
-    hero.hidden = false;
-    gameSection.hidden = true;
-    $("inicio").scrollIntoView({ behavior: "smooth", block: "start" });
-    showToast("Aventura reiniciada. Quando quiser, comece novamente!");
+    renderNode("portal", "A aventura recomeçou. Boa sorte, explorador!");
+    document.getElementById("aventura").scrollIntoView({ behavior: "smooth" });
   }
 
-  function showToast(message) {
-    const toast = $("toast");
-    toast.textContent = message;
-    toast.classList.add("show");
+  ui.restart.addEventListener("click", restart);
 
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => {
-      toast.classList.remove("show");
-    }, 2600);
-  }
-
-  startButton.addEventListener("click", startGame);
-  ctaButton.addEventListener("click", startGame);
-  restartButton.addEventListener("click", restartGame);
-
-  state = initialState();
-  updateStats();
+  // Mostra a primeira etapa assim que o JavaScript é carregado.
+  renderNode("portal");
 });
