@@ -4,190 +4,192 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#101020">
-  <meta name="description" content="Aventura dos Algoritmos: um jogo interativo de decisões, lógica e programação.">
-  <title>Aventura dos Algoritmos | Jogo Interativo</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="css/style.css">
-  <script src="js/game.js" defer></script>
+  <meta name="theme-color" content="#100b25">
+  <meta name="description" content="Uma aventura interativa para aprender algoritmos, lógica de programação, condições e decisões.">
+  <title>Algoritmos — Uma aventura interativa</title>
+  <link rel="stylesheet" href="./css/style.css">
+  <script src="./js/game.js" defer></script>
 </head>
 <body>
-  <div class="background-glow glow-one"></div>
-  <div class="background-glow glow-two"></div>
-
   <header class="topbar">
-    <a href="#inicio" class="brand" aria-label="Aventura dos Algoritmos - início">
-      <span class="brand-symbol">&lt;/&gt;</span>
-      <span class="brand-name">AVENTURA<span> DOS ALGORITMOS</span></span>
+    <a class="brand" href="#inicio" aria-label="Página inicial">
+      <span class="brand-symbol">A<span>;</span></span>
+      <span>ALGORITMOS<small>UMA AVENTURA DIGITAL</small></span>
     </a>
-    <div class="topbar-status">
-      <span class="live-dot"></span>
-      EXPERIÊNCIA INTERATIVA
-    </div>
+    <a class="nav-link" href="#aventura">Jogar agora <span>↗</span></a>
   </header>
 
-  <main id="inicio">
-    <section class="hero" id="hero">
-      <div class="hero-copy">
-        <div class="eyebrow"><span>MISSÃO 001</span> · O INÍCIO DE TUDO</div>
-        <h1>O código é seu.<br>A <span class="gradient-text">aventura também.</span></h1>
-        <p>
-          Entre em um mundo digital, tome decisões, resolva enigmas
-          e descubra como os algoritmos podem transformar cada escolha
-          em um novo caminho.
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-content">
+        <div class="eyebrow"><span class="pulse"></span> MISSÃO DE APRENDIZAGEM</div>
+        <h1>Seu próximo passo<br>é <span>programar.</span></h1>
+        <p class="hero-description">
+          Entre em um universo digital, resolva desafios e descubra como
+          os algoritmos transformam ideias em soluções.
         </p>
-        <button class="button button-primary" id="start-game">
-          Começar aventura <span aria-hidden="true">→</span>
-        </button>
-        <div class="hero-details">
-          <div><span class="detail-icon">⌘</span><span><strong>Decisões</strong><small>Escolha seu caminho</small></span></div>
-          <div><span class="detail-icon">◇</span><span><strong>Desafios</strong><small>Use sua lógica</small></span></div>
-          <div><span class="detail-icon">✦</span><span><strong>Finais</strong><small>Crie sua história</small></span></div>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#aventura">Começar aventura <span>→</span></a>
+          <a class="button button-secondary" href="#aprendizado">Conhecer o projeto</a>
+        </div>
+        <div class="hero-stats">
+          <div><strong>01</strong><span>AVENTURA</span></div>
+          <div><strong>∞</strong><span>POSSIBILIDADES</span></div>
+          <div><strong>100%</strong><span>INTERATIVO</span></div>
         </div>
       </div>
 
-      <div class="hero-art" aria-label="Ilustração de uma aventura digital">
-        <div class="orbit orbit-large"></div>
-        <div class="orbit orbit-small"></div>
-        <div class="planet planet-back"></div>
-        <div class="floating-symbol symbol-one">&lt;/&gt;</div>
-        <div class="floating-symbol symbol-two">{ }</div>
-        <div class="floating-symbol symbol-three">01</div>
-        <div class="adventure-portal">
-          <div class="portal-ring ring-one"></div>
-          <div class="portal-ring ring-two"></div>
-          <div class="portal-core">
-            <span class="portal-star">✦</span>
-            <span class="portal-text">ENTER<br>THE UNKNOWN</span>
+      <div class="hero-art" aria-label="Ilustração de um portal digital">
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+        <div class="portal">
+          <div class="portal-inner">
+            <span class="code-mark">&lt;/&gt;</span>
+            <span class="portal-caption">PORTAL DE CÓDIGO</span>
           </div>
         </div>
-        <div class="art-caption"><span class="live-dot"></span> NOVO MUNDO DETECTADO</div>
+        <div class="floating-card card-code"><span>01</span> lógica<span class="mini-dot"></span></div>
+        <div class="floating-card card-xp">✦ <span id="hero-xp">0 XP</span></div>
+        <div class="floating-card card-bracket">{ }</div>
       </div>
     </section>
 
-    <section class="game-layout" id="game-section" hidden>
-      <aside class="player-panel">
-        <div class="panel-label">SEU PERSONAGEM</div>
-        <div class="player-avatar">⌘</div>
-        <h2>Explorador Digital</h2>
-        <p class="player-description">Programador em treinamento</p>
-
-        <div class="stat-block">
-          <div class="stat-heading"><span>Energia</span><strong id="energy-text">100 / 100</strong></div>
-          <div class="stat-track"><div class="stat-fill energy-fill" id="energy-bar"></div></div>
-        </div>
-
-        <div class="stat-block">
-          <div class="stat-heading"><span>Experiência</span><strong id="xp-text">0 XP</strong></div>
-          <div class="stat-track"><div class="stat-fill xp-fill" id="xp-bar"></div></div>
-        </div>
-
-        <div class="inventory">
-          <div class="inventory-heading"><span>◇</span> INVENTÁRIO</div>
-          <div id="inventory-list" class="inventory-list">
-            <p class="inventory-empty">Seus itens aparecerão aqui.</p>
-          </div>
-        </div>
-
-        <div class="mission-mini">
-          <span class="mission-mini-icon">✧</span>
-          <div><strong>Objetivo</strong><p>Encontrar o Núcleo dos Algoritmos.</p></div>
-        </div>
-      </aside>
-
-      <section class="story-panel" aria-live="polite">
-        <div class="story-top">
-          <span class="chapter-label" id="chapter-label">CAPÍTULO 01</span>
-          <span class="progress-label" id="progress-label">PROGRESSO 0%</span>
-        </div>
-        <div class="story-progress"><div id="story-progress-fill"></div></div>
-
-        <div class="story-art" id="story-art">
-          <div class="story-art-grid"></div>
-          <div class="story-illustration" id="story-illustration">⌘</div>
-          <span class="art-coordinate coordinate-one">SYS.001</span>
-          <span class="art-coordinate coordinate-two">WORLD ONLINE</span>
-        </div>
-
-        <div class="story-content">
-          <div class="story-kicker" id="story-kicker">SINAL RECEBIDO</div>
-          <h2 id="story-title">O portal desconhecido</h2>
-          <p id="story-description"></p>
-
-          <div class="challenge-box" id="challenge-box" hidden>
-            <div class="challenge-heading"><span>◇</span> DESAFIO DE LÓGICA</div>
-            <p id="challenge-question"></p>
-            <div class="challenge-answers" id="challenge-answers"></div>
-            <p class="challenge-feedback" id="challenge-feedback" aria-live="polite"></p>
-          </div>
-
-          <div class="choices-heading" id="choices-heading">O QUE VOCÊ VAI FAZER?</div>
-          <div class="choices-list" id="choices-list"></div>
-          <p class="story-message" id="story-message" aria-live="polite"></p>
-
-          <div class="story-footer">
-            <span><span class="live-dot"></span> DECISÕES ALTERAM SUA JORNADA</span>
-            <button class="text-button" id="restart-game">↺ Reiniciar jogo</button>
-          </div>
-        </div>
-      </section>
-    </section>
-
-    <section class="how-section" id="como-funciona">
+    <section class="game-section section-wrap" id="aventura">
       <div class="section-heading">
-        <span class="eyebrow">POR TRÁS DA AVENTURA</span>
-        <h2>Aprenda enquanto <span class="gradient-text">explora.</span></h2>
-        <p>Cada parte do jogo demonstra um conceito fundamental da programação.</p>
+        <div>
+          <span class="eyebrow">SUA JORNADA COMEÇA AQUI</span>
+          <h2>O código está em suas mãos.</h2>
+          <p>Escolha seu caminho. Cada decisão pode mudar a aventura.</p>
+        </div>
+        <div class="chapter-pill"><span></span> MODO HISTÓRIA</div>
       </div>
 
-      <div class="concept-grid">
-        <article class="concept-card">
-          <div class="concept-icon purple-icon">↗</div>
-          <span class="concept-index">01 / DECISÕES</span>
-          <h3>Condicionais</h3>
-          <p>As escolhas usam condições para determinar o próximo acontecimento da história.</p>
-          <code>if (escolha) { ... }</code>
-        </article>
+      <div class="game-layout">
+        <aside class="player-panel">
+          <div class="panel-label">PERSONAGEM</div>
+          <div class="avatar"><span>&lt;_&gt;</span></div>
+          <h3>Explorador digital</h3>
+          <p class="player-subtitle">Aprendiz de algoritmos</p>
 
-        <article class="concept-card">
-          <div class="concept-icon cyan-icon">⟳</div>
-          <span class="concept-index">02 / ESTADOS</span>
-          <h3>Variáveis</h3>
-          <p>Energia, experiência e itens guardam informações que mudam durante a aventura.</p>
-          <code>let energia = 100;</code>
-        </article>
+          <div class="stat-block">
+            <div class="stat-label"><span>Energia</span><strong id="energy-text">100%</strong></div>
+            <div class="progress-track"><div id="energy-bar" class="progress-fill energy-fill" style="width:100%"></div></div>
+          </div>
+          <div class="stat-block">
+            <div class="stat-label"><span>Experiência</span><strong id="xp-text">0 XP</strong></div>
+            <div class="progress-track"><div id="xp-bar" class="progress-fill xp-fill" style="width:0%"></div></div>
+          </div>
 
-        <article class="concept-card">
-          <div class="concept-icon pink-icon">◇</div>
-          <span class="concept-index">03 / LÓGICA</span>
+          <div class="inventory">
+            <div class="panel-label">INVENTÁRIO</div>
+            <div id="inventory-list" class="inventory-list">
+              <span class="inventory-empty">Seus itens aparecerão aqui.</span>
+            </div>
+          </div>
+          <div class="player-tip"><span>✦</span><p><strong>Dica:</strong> leia as opções com atenção. Pensar antes de agir também é programar.</p></div>
+        </aside>
+
+        <div class="story-panel">
+          <div class="story-topline">
+            <span id="chapter-label">CAPÍTULO 01</span>
+            <span id="progress-label">INÍCIO DA JORNADA</span>
+          </div>
+          <div class="story-progress"><div id="story-progress-fill"></div></div>
+
+          <div class="story-art" id="story-art">
+            <div class="story-art-grid"></div>
+            <div class="story-symbol" id="story-illustration">⌘</div>
+            <div class="story-art-label">DIGITAL FRONTIER <span>● ONLINE</span></div>
+          </div>
+
+          <div class="story-copy">
+            <span id="story-kicker" class="story-kicker">UM NOVO UNIVERSO</span>
+            <h3 id="story-title">O portal desconhecido</h3>
+            <p id="story-description">
+              Você encontra um portal brilhante em um laboratório abandonado.
+              Do outro lado, um universo digital espera por alguém capaz de
+              resolver seus enigmas. Sua missão começa agora.
+            </p>
+          </div>
+
+          <div class="choices-area">
+            <h4 id="choices-heading">O QUE VOCÊ VAI FAZER?</h4>
+            <div id="choices-list" class="choices-list">
+              <button class="choice-button" type="button" data-choice="start">
+                <span class="choice-number">01</span>
+                <span class="choice-text"><strong>Entrar no portal</strong><small>Descobrir o que existe do outro lado</small></span>
+                <span class="choice-arrow">→</span>
+              </button>
+              <button class="choice-button" type="button" data-choice="observe">
+                <span class="choice-number">02</span>
+                <span class="choice-text"><strong>Observar os símbolos</strong><small>Procurar pistas antes de avançar</small></span>
+                <span class="choice-arrow">→</span>
+              </button>
+            </div>
+            <div id="challenge-box" class="challenge-box" hidden>
+              <p id="challenge-question"></p>
+              <div id="challenge-answers" class="challenge-answers"></div>
+              <p id="challenge-feedback" class="challenge-feedback" aria-live="polite"></p>
+            </div>
+            <p id="story-message" class="story-message" aria-live="polite"></p>
+            <div class="game-footer">
+              <span><span class="live-dot"></span> PROGRESSO SALVO NESTA SESSÃO</span>
+              <button id="restart-game" type="button" class="restart-button">↻ Reiniciar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="learning-section section-wrap" id="aprendizado">
+      <div class="section-heading">
+        <div>
+          <span class="eyebrow">APRENDER FAZ PARTE DA MISSÃO</span>
+          <h2>Conhecimento é seu superpoder.</h2>
+          <p>Durante a aventura, você vai encontrar conceitos essenciais da programação.</p>
+        </div>
+      </div>
+      <div class="learning-grid">
+        <article class="learning-card">
+          <span class="learning-icon purple-icon">&lt;/&gt;</span>
+          <span class="card-index">CONCEITO 01</span>
           <h3>Algoritmos</h3>
-          <p>Uma sequência organizada de instruções ajuda a resolver problemas e concluir missões.</p>
-          <code>passo1 → passo2 → resultado</code>
+          <p>Uma sequência organizada de instruções para alcançar um objetivo ou resolver um problema.</p>
+        </article>
+        <article class="learning-card">
+          <span class="learning-icon cyan-icon">◇</span>
+          <span class="card-index">CONCEITO 02</span>
+          <h3>Condições</h3>
+          <p>Regras que permitem ao programa tomar decisões conforme uma situação.</p>
+        </article>
+        <article class="learning-card">
+          <span class="learning-icon pink-icon">↗</span>
+          <span class="card-index">CONCEITO 03</span>
+          <h3>Lógica</h3>
+          <p>Organizar informações, analisar possibilidades e escolher caminhos coerentes.</p>
         </article>
       </div>
     </section>
 
-    <section class="final-cta">
+    <section class="final-cta section-wrap">
       <div class="cta-decoration">&lt;/&gt;</div>
-      <div>
-        <span class="eyebrow">SUA JORNADA COMEÇA COM UMA ESCOLHA</span>
-        <h2>Pronto para descobrir<br>seu próximo caminho?</h2>
-        <p>Use a lógica. Explore as possibilidades. Construa sua aventura.</p>
-      </div>
-      <button class="button button-primary" id="cta-start">Jogar agora ↗</button>
+      <span class="eyebrow">TODA GRANDE IDEIA COMEÇA COM UM PASSO</span>
+      <h2>Pronto para escrever<br><span>sua história?</span></h2>
+      <p>O próximo nível depende da sua próxima decisão.</p>
+      <a class="button button-primary" href="#aventura">Voltar para a aventura <span>→</span></a>
     </section>
   </main>
 
-  <footer class="footer">
-    <a href="#inicio" class="footer-brand"><span class="brand-symbol">&lt;/&gt;</span> AVENTURA DOS ALGORITMOS</a>
-    <p>Projeto educativo desenvolvido com HTML, CSS e JavaScript.</p>
-    <span>© 2026 · MISSÃO CONCLUÍDA?</span>
+  <footer class="site-footer">
+    <a class="brand footer-brand" href="#inicio"><span class="brand-symbol">A<span>;</span></span><span>ALGORITMOS<small>UMA AVENTURA DIGITAL</small></span></a>
+    <p>Projeto educacional • HTML, CSS e JavaScript</p>
+    <a href="#inicio">Voltar ao topo ↑</a>
   </footer>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <noscript>
+    <div class="noscript-notice">
+      O conteúdo da página está disponível, mas para jogar você precisa ativar o JavaScript no navegador.
+    </div>
+  </noscript>
 </body>
 </html>
